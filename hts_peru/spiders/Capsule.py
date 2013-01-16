@@ -26,9 +26,8 @@ class HtsSpider (BaseSpider):
 
     def parse(self, response):
         cap = CapsuleParse()
-        Codes = cap.read_jason('code.json')
+        Codes = cap.read_jason('code_4.json')
         formRequests = []
-        self.formDetail = []
         form_data = {
                     'countries': 'PE',
                     'country': 'all',
@@ -85,14 +84,15 @@ class HtsSpider (BaseSpider):
                     #Verificar si contiene un link y si el codigo es mayor a 5 cifras
                     if len(url) > 0 and len(code) > 5:
                         #Solo codigos refenrentes al hs del json
-                        if code.find(hts['code']) >= 0:
+                        if code == hts['code']:
+                        #if code.find(hts['code']) >= 0:
                             hts_tariff = Hts_tariff()
                             advalorem = row.select('.//td[3]/img/@src').extract()
                             advalorem = cap.parse_srcadvalorem(advalorem[0])
                             if(len(code) == 6):
-                                hts_tariff['code'] = cap.parse_code(code + "0000")
+                                hts_tariff['code'] = cap.complete_code(code)
                             else:
-                                hts_tariff['code'] = cap.parse_code(code)
+                                hts_tariff['code'] = cap.complete_code(code)
                             hts_tariff['name'] = cap.parse_description(description[0])
                             hts_tariff['hs'] = cap.parse_code(code)[:6]
                             hts_tariff['tariff_all'] = advalorem

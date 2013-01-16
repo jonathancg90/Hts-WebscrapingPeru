@@ -16,6 +16,10 @@ class CapsuleParse:
     def parse_code(self, code):
         code = code.strip()
         code = code.replace('.', '')
+        return code
+
+    def complete_code(self,code):
+        code = self.parse_code(code)
         if len(code) == 4:
             code = code + "000000"
         if len(code) == 6:
