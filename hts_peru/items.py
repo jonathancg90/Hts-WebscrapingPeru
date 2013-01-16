@@ -17,8 +17,18 @@ class Hts(Item):
     count = Field()
 
 
-class Hs(Item):
+class Hts_name(Item):
     code = Field()
     name = Field()
 
 
+class Hts_tariff(Item):
+    code = Field()
+    hs = Field()
+    name = Field()
+    tariff_all = Field()
+
+
+class Hs(Item):
+    code = Field()
+    name =  Field()
