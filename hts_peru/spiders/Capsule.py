@@ -26,8 +26,9 @@ class HtsSpider (BaseSpider):
 
     def parse(self, response):
         cap = CapsuleParse()
-        Codes = cap.read_jason('code_4.json')
+        Codes = cap.read_jason('code_exeption.json')
         formRequests = []
+        self.formDetail = []
         form_data = {
                     'countries': 'PE',
                     'country': 'all',
@@ -73,7 +74,6 @@ class HtsSpider (BaseSpider):
                 if(len(code) < 1):
                     code = row.select('.//td[1]/a/text()').extract()
                 description = row.select('.//td[2]/text()').extract()
-                print "CODIGO A ANALISAR: " + str(code) 
                 if(len(code) > 0 and  len(description) > 0):
                     code = cap.parse_code(code[0])
                     url = row.select('.//td[1]/a/@href').extract()
@@ -83,11 +83,15 @@ class HtsSpider (BaseSpider):
                         #    yield Hs(code=cap.parse_code(code[0]), name=cap.parse_description(description[0]))
                     #Verificar si contiene un link y si el codigo es mayor a 5 cifras
                     if len(url) > 0 and len(code) > 5:
+                    #if len(url) > 0 and len(code) > 5:
                         #Solo codigos refenrentes al hs del json
-                        if code == hts['code']:
-                        #if code.find(hts['code']) >= 0:
+                        print "CODIGO A ANALISAR: " + code + " in " + hts['code']
+                        #if code == hts['code']:
+                        if code.find(hts['code']) >= 0:
                             hts_tariff = Hts_tariff()
                             advalorem = row.select('.//td[3]/img/@src').extract()
+                            if len(advalorem) == 0:
+                                advalorem = row.select('.//td[2]/img/@src').extract()
                             advalorem = cap.parse_srcadvalorem(advalorem[0])
                             if(len(code) == 6):
                                 hts_tariff['code'] = cap.complete_code(code)

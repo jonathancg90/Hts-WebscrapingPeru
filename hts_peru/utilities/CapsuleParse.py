@@ -11,7 +11,17 @@ class CapsuleParse:
         advalorem = img[slash:]
         advalorem = advalorem.split('.')
         advalorem = advalorem[0]
+        advalorem = self.parse_imgadvalorem(advalorem)
         return advalorem
+
+    def parse_imgadvalorem(self, img):
+        if img == "AT3583766603":
+            img = 0
+        if img == "AT2210486221":
+            img = 6
+        if img == "AT1471251776":
+            img = 11
+        return img
 
     def parse_code(self, code):
         code = code.strip()
@@ -57,62 +67,71 @@ class CapsuleParse:
         return AdValorem
 
     def parse_general(self, general):
-        General = []
-        general = general.strip()
-        Tax = ['General Sales Tax', 'Municipal Promotion Tax']
-        #import pdb;pdb.set_trace()
-        if general.find('Goods falling under this subheading are exempted from general sales tax') >= 0:
-            #No tiene
-            pass
-        else :
-            #Exceptions feature
-            if general.find('other than those') >= 0:
-                #Codigo de parseo
-                Data = general.split('.')
-                max = Data[2].rfind(',')
-                feature = Data[2][:max]
-                temp = {
-                        'currency' : '%',
-                        'percentage': '0',
-                        'description': Tax[0],
-                        'targetValue' : 'CIF',
-                        'feature': feature
-                        }
-                General.append(temp)
-                temp = {
-                        'currency' : '%',
-                        'percentage': '0',
-                        'description': Tax[1],
-                        'targetValue' : 'CIF',
-                        'feature': feature
-                        }
-                General.append(temp)
-            else:
-                Data = general.split('%')
-                tariff = []
-                for data in Data:  
-                    max = len(data)
-                    min = data.rfind(' ')
-                    temp = data[min:max]
-                    tariff.append(temp)
-                #Calculate Igv
-                igv = float(tariff[0]) - float(tariff[1])
-                temp = {
-                        'currency' : '%',
-                        'percentage': igv,
-                        'description': Tax[0],
-                        'targetValue' : 'CIF'
-                        }
-                General.append(temp)
-                temp = {
-                        'currency' : '%',
-                        'percentage': tariff[1],
-                        'description': Tax[1],
-                        'targetValue' : 'CIF'
-                        }
-                #Register General / Municipal
-                General.append(temp)
+        try :
+            General = []
+            general = general.strip()
+            Tax = ['General Sales Tax', 'Municipal Promotion Tax']
+            #import pdb;pdb.set_trace()
+            if general.find('Goods falling under this subheading are exempted from general sales tax') >= 0:
+                #No tiene
+                pass
+            else :
+                #Exceptions feature
+                if general.find('other than those') >= 0:
+                    #Codigo de parseo
+                    Data = general.split('.')
+                    max = Data[2].rfind(',')
+                    feature = Data[2][:max]
+                    temp = {
+                            'currency' : '%',
+                            'percentage': '0',
+                            'description': Tax[0],
+                            'targetValue' : 'CIF',
+                            'feature': feature
+                            }
+                    General.append(temp)
+                    temp = {
+                            'currency' : '%',
+                            'percentage': '0',
+                            'description': Tax[1],
+                            'targetValue' : 'CIF',
+                            'feature': feature
+                            }
+                    General.append(temp)
+                else:
+                    Data = general.split('%')
+                    tariff = []
+                    for data in Data:  
+                        max = len(data)
+                        min = data.rfind(' ')
+                        temp = data[min:max]
+                        tariff.append(temp)
+                    #Calculate Igv
+                    tariff[0] = self.except_general(tariff[0])
+                    tariff[1] = self.except_general(tariff[1])
+                    igv = float(tariff[0]) - float(tariff[1])
+                    temp = {
+                            'currency' : '%',
+                            'percentage': igv,
+                            'description': Tax[0],
+                            'targetValue' : 'CIF'
+                            }
+                    General.append(temp)
+                    temp = {
+                            'currency' : '%',
+                            'percentage': tariff[1],
+                            'description': Tax[1],
+                            'targetValue' : 'CIF'
+                            }
+                    #Register General / Municipal
+                    General.append(temp)
+        except Exception,e:
+            import pdb;pdb.set_trace()
         return General
+
+    def except_general(self,number):
+        number = number.replace('a', '')
+        return number
 
     def parse_insurance(self, insurange):
         insurange = insurange.strip()
